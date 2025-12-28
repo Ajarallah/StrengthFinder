@@ -2,15 +2,11 @@
   "name": "strengthscoach-ai",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://Ajarallah.github.io/StrengthFinder",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
-  },
   "dependencies": {
     "react-markdown": "^10.1.0",
     "@google/genai": "^1.34.0",
@@ -22,7 +18,6 @@
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "~5.8.2",
-    "vite": "^6.2.0",
-    "gh-pages": "^6.2.0"
+    "vite": "^6.2.0"
   }
 }
