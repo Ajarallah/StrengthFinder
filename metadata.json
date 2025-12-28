@@ -1,0 +1,7 @@
+{
+  "name": "StrengthsCoach AI",
+  "description": "An expert-level AI application acting as a professional CliftonStrengths / StrengthsFinder 2.0 coach. Analyze reports, uncover blind spots, and receive actionable, direct coaching.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
