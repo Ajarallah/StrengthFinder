@@ -1,7 +1,8 @@
 
-export const GEMINI_FLASH_MODEL = 'gemini-2.0-flash';
-export const GEMINI_PRO_MODEL = 'gemini-2.0-flash-thinking-exp-01-21';
-export const GEMINI_LIVE_MODEL = 'gemini-2.0-flash';
+// OpenRouter model names
+export const GEMINI_FLASH_MODEL = 'google/gemini-2.5-flash';
+export const GEMINI_PRO_MODEL = 'google/gemini-2.5-flash'; // Using same model for now
+export const GEMINI_LIVE_MODEL = 'google/gemini-2.5-flash'; // Voice not supported on OpenRouter
 
 // DOMAIN MAPPING
 export const STRENGTH_TO_DOMAIN_MAP: Record<string, string> = {
