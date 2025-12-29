@@ -15,7 +15,7 @@ import { ReportData, Strength, Language, AnalyticsInsights } from "../types";
 let clientInstance: GoogleGenAI | null = null;
 const getClient = () => {
   if (!clientInstance) {
-    clientInstance = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    clientInstance = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   }
   return clientInstance;
 };
