@@ -26,6 +26,13 @@ const FileUpload: React.FC<FileUploadProps> = ({ onReportLoaded, language }) => 
       return;
     }
 
+    // Validate file size (max 50MB)
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+    if (file.size > MAX_FILE_SIZE) {
+      setError("File is too large. Maximum file size is 50MB.");
+      return;
+    }
+
     setIsProcessing(true);
     setLoadingPhase('extracting');
     setError(null);
@@ -38,9 +45,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ onReportLoaded, language }) => 
 
       setLoadingPhase('analyzing');
       const reportData = await parseReport(text);
-      if (!reportData) {
-        throw new Error("Could not identify CliftonStrengths data in this file.");
-      }
 
       onReportLoaded(reportData);
     } catch (err: any) {

@@ -1,9 +1,9 @@
 import { GoogleGenAI, Type, Modality, LiveServerMessage } from "@google/genai";
-import { 
-  GEMINI_FLASH_MODEL, 
-  GEMINI_PRO_MODEL, 
+import {
+  GEMINI_FLASH_MODEL,
+  GEMINI_PRO_MODEL,
   GEMINI_LIVE_MODEL,
-  REPORT_EXTRACTION_PROMPT, 
+  REPORT_EXTRACTION_PROMPT,
   REPORT_SUMMARY_PROMPT,
   COACHING_SYSTEM_INSTRUCTION,
   LIVE_VOICE_INSTRUCTION,
@@ -11,7 +11,14 @@ import {
 } from "../constants";
 import { ReportData, Strength, Language, AnalyticsInsights } from "../types";
 
-const getClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Singleton pattern - create client once and reuse
+let clientInstance: GoogleGenAI | null = null;
+const getClient = () => {
+  if (!clientInstance) {
+    clientInstance = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  }
+  return clientInstance;
+};
 
 // --- UTILS FOR AUDIO ---
 
@@ -64,7 +71,7 @@ export const parseReport = async (text: string): Promise<ReportData | null> => {
   try {
     const response = await ai.models.generateContent({
       model: GEMINI_FLASH_MODEL,
-      contents: REPORT_EXTRACTION_PROMPT + "\n\nREPORT TEXT:\n" + text.substring(0, 50000), 
+      contents: REPORT_EXTRACTION_PROMPT + "\n\nREPORT TEXT:\n" + text, 
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -98,23 +105,54 @@ export const parseReport = async (text: string): Promise<ReportData | null> => {
       }
     });
 
-    const parsed = JSON.parse(response.text || "null");
-    
+    let parsed;
+    try {
+      parsed = JSON.parse(response.text || "null");
+    } catch (jsonError) {
+      console.error("JSON Parse Error:", jsonError);
+      console.error("Response text was:", response.text);
+      throw new Error("Failed to parse Gemini response. The API may have returned invalid data.");
+    }
+
     if (!parsed || !parsed.top5 || parsed.top5.length === 0) {
       console.warn("Mode 1 Failed: No Top 5 found in JSON.");
-      return null;
+      throw new Error("Could not identify CliftonStrengths data in this file. Please ensure it's a valid StrengthsFinder report.");
     }
 
     return {
       top5: parsed.top5,
       full34: parsed.full34,
-      rawText: text, 
+      rawText: text,
       userName: parsed.userName
     };
 
-  } catch (error) {
+  } catch (error: any) {
+    // Provide specific error messages based on error type
+    if (error.message?.includes('parse') || error.message?.includes('JSON')) {
+      throw error; // Re-throw parse errors with their specific message
+    }
+
+    if (error.status === 401 || error.message?.includes('API key')) {
+      console.error("API Key Error:", error);
+      throw new Error("Invalid API key. Please check your Gemini API configuration.");
+    }
+
+    if (error.status === 404 || error.message?.includes('not found')) {
+      console.error("Model Not Found:", error);
+      throw new Error("Gemini model not available. Please contact support.");
+    }
+
+    if (error.status === 429 || error.message?.includes('quota') || error.message?.includes('rate')) {
+      console.error("Rate Limit Error:", error);
+      throw new Error("API rate limit exceeded. Please try again in a few moments.");
+    }
+
+    if (error.message?.includes('CliftonStrengths')) {
+      throw error; // Re-throw validation errors
+    }
+
     console.error("MODE 1 Error (Extraction):", error);
-    return null;
+    throw new Error(`Failed to analyze report: ${error.message || 'Unknown error occurred'}`);
   }
 };
 
@@ -215,7 +253,7 @@ export const sendMessageStream = async ({
     ${structuredContext}
 
     [FULL REPORT TEXT REFERENCE]
-    ${reportContext.substring(0, 30000)}
+    ${reportContext}
     
     [USER PREFERENCE]
     Output Mode: ${outputMode}
