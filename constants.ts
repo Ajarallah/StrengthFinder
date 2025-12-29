@@ -1,7 +1,7 @@
 
-// Google Gemini API model names (most stable and widely available)
-export const GEMINI_FLASH_MODEL = 'gemini-1.5-flash';
-export const GEMINI_PRO_MODEL = 'gemini-1.5-pro';
+// Google Gemini API model names (latest stable versions - Dec 2025)
+export const GEMINI_FLASH_MODEL = 'gemini-2.5-flash';
+export const GEMINI_PRO_MODEL = 'gemini-2.5-pro';
 export const GEMINI_LIVE_MODEL = 'gemini-2.0-flash-exp';
 
 // DOMAIN MAPPING
