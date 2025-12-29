@@ -38,16 +38,28 @@ const FileUpload: React.FC<FileUploadProps> = ({ onReportLoaded, language }) => 
     setError(null);
 
     try {
+      console.log("📄 Starting PDF extraction...");
       const text = await extractTextFromPdf(file);
+      console.log(`✅ Extracted ${text.length} characters from PDF`);
+
       if (!text || text.length < 50) {
         throw new Error("Could not extract enough text. Is the PDF scanned?");
       }
 
       setLoadingPhase('analyzing');
+      console.log("🤖 Sending to Gemini API for analysis...");
       const reportData = await parseReport(text);
+      console.log("✅ Gemini analysis successful!", reportData);
 
       onReportLoaded(reportData);
     } catch (err: any) {
+      console.error("❌ File upload error:", err);
+      console.error("Error details:", {
+        message: err.message,
+        status: err.status,
+        stack: err.stack,
+        fullError: err
+      });
       setError(err.message || "An error occurred while processing the file.");
       setIsProcessing(false);
     }
@@ -156,8 +168,16 @@ const FileUpload: React.FC<FileUploadProps> = ({ onReportLoaded, language }) => 
               </div>
               <div className="flex-1">
                 <h4 className="text-lg font-bold text-[var(--text-primary)] mb-1">{t.errorFriendlyTitle}</h4>
+
+                {/* Show the ACTUAL error message */}
+                <div className="mb-3 p-3 bg-red-500/5 border border-red-500/20 rounded-lg">
+                  <p className="text-sm font-mono text-red-600 dark:text-red-400">
+                    <strong>Error:</strong> {error}
+                  </p>
+                </div>
+
                 <p className="text-sm text-[var(--text-secondary)] mb-4">{t.errorFriendlyBody}</p>
-                
+
                 <div className="space-y-2">
                   {t.errorSuggestions.map((suggestion, i) => (
                     <div key={i} className="flex items-center gap-2 text-xs text-red-500/80">
